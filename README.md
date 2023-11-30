@@ -1,1 +1,0 @@
-# market-ticker.github.io
