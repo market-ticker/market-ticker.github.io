@@ -1,122 +1,13 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Commodities Market</title>
-    <style>
-        #commoditiesList, #createCommodity {
-            margin: 20px;
-            padding: 20px;
-            border: 1px solid #ddd;
-        }
-        #newCommodityForm input {
-            margin: 10px 0;
-        }
-    </style>
-</head>
-<body>
-    <div id="commoditiesList">
-        <h2>Existing Commodities</h2>
-        <ul id="commodityItems">
-            <!-- Commodity items will be listed here -->
-        </ul>
-    </div>
-    <div id="createCommodity">
-        <h2>Create New Commodity</h2>
-        <form id="newCommodityForm">
-            <input type="text" id="commodityName" placeholder="Commodity Name" required>
-            <input type="text" id="commoditySymbol" placeholder="Commodity Symbol" required>
-            <button type="submit">Create Commodity</button>
-        </form>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/web3@1.3.6/dist/web3.min.js"></script>
-    <script>
-        const contractABI = [{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"token","type":"address"},{"indexed":false,"internalType":"string","name":"name","type":"string"},{"indexed":false,"internalType":"string","name":"symbol","type":"string"}],"name":"CommodityCreated","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"buyOrderId","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"sellOrderId","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"matchedAmount","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"matchedPrice","type":"uint256"}],"name":"OrderMatched","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"id","type":"uint256"},{"indexed":false,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"price","type":"uint256"},{"indexed":false,"internalType":"bool","name":"isBuyOrder","type":"bool"}],"name":"OrderPlaced","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"orderId","type":"uint256"}],"name":"OrderRemoved","type":"event"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"buyOrders","outputs":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"address","name":"user","type":"address"},{"internalType":"address","name":"token","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"uint256","name":"price","type":"uint256"},{"internalType":"bool","name":"isBuyOrder","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"commodities","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"string","name":"name","type":"string"},{"internalType":"string","name":"symbol","type":"string"}],"name":"createCommodity","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"token","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"mintCommodityTokens","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"token","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"uint256","name":"price","type":"uint256"},{"internalType":"bool","name":"isBuyOrder","type":"bool"}],"name":"placeOrder","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"sellOrders","outputs":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"address","name":"user","type":"address"},{"internalType":"address","name":"token","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"uint256","name":"price","type":"uint256"},{"internalType":"bool","name":"isBuyOrder","type":"bool"}],"stateMutability":"view","type":"function"}];
-        const contractAddress = '0xd0e6eF40883ae731809574d1f71750DF713015BB';
-
-        window.addEventListener('load', async () => {
-    // Initialize Web3 and contract
-    const web3 = new Web3(Web3.givenProvider || "ws://localhost:8545");
-    const commoditiesContract = new web3.eth.Contract(contractABI, contractAddress);
-
-        const fetchAndDisplayCommodities = async () => {
-            try {
-                const query = `{
-                    commodityCreateds {
-                        id
-                        token
-                        name
-                        symbol
-                        blockNumber
-                        blockTimestamp
-                        transactionHash
-                    }
-                }`;
-
-                const response = await fetch('https://api.studio.thegraph.com/query/59606/cmt2/v0.0.1', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                    },
-                    body: JSON.stringify({ query })
-                });
-
-                const { data } = await response.json();
-
-                const commoditiesList = document.getElementById('commodityItems');
-                commoditiesList.innerHTML = data.commodityCreateds.map(commodity => 
-                    `<li>${commodity.name} (${commodity.symbol}) - Token Address: ${commodity.token}</li>`
-                ).join('');
-            } catch (error) {
-                console.error('Error fetching commodities:', error);
-            }
-        };
-
-        // Fetch and display commodities on load
-        fetchAndDisplayCommodities();
-
-        const handleCreateCommodity = async (name, symbol) => {
-    try {
-        // Check if MetaMask is available
-        if (!window.ethereum) {
-            throw new Error('MetaMask is not installed!');
-        }
-
-        // Request account access if needed
-        await ethereum.request({ method: 'eth_requestAccounts' });
-
-        // Get the first account
-        const account = (await web3.eth.getAccounts())[0];
-
-        // Send transaction to smart contract
-        await commoditiesContract.methods.createCommodity(name, symbol).send({ from: account })
-            .on('transactionHash', (hash) => {
-                console.log('Transaction Hash:', hash);
-                // You can optionally show the user the transaction hash
-            })
-            .on('confirmation', (confirmationNumber, receipt) => {
-                console.log('Transaction confirmed:', receipt);
-                // Refresh commodities list or page here
-                fetchAndDisplayCommodities();
-            });
-    } catch (error) {
-        console.error('Error creating commodity:', error);
-        alert(error.message); // Optionally alert the user
-    }
-};
-
-document.getElementById('newCommodityForm').addEventListener('submit', (e) => {
-    e.preventDefault();
-    const name = document.getElementById('commodityName').value;
-    const symbol = document.getElementById('commoditySymbol').value;
-    handleCreateCommodity(name, symbol);
-});
-        // Add your handleCreateCommodity function and event listener for form submission
-    });
-
-    </script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite + React + TS</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>
