@@ -4,5 +4,5 @@ export function getRpcUrl() {
     return "";
   }
 
-  return `$RPC_SEPOLIA_ETH`;
+  return `https://eth-sepolia.g.alchemy.com/v2/3MF2Iod6gYid-fVYPJFc_YF1d9_pUVgr`;
 }

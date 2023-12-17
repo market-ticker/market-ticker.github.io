@@ -4,7 +4,7 @@ interface Commodity {
   id: string;
   name: string;
   symbol: string;
-  token: string;
+  comId: string;
 }
 
 // GraphQL query to fetch commodities
@@ -12,7 +12,7 @@ const COMMODITIES_QUERY = `
   query {
         commodityCreateds {
           id
-          token
+          comId
           name
           symbol
       }
@@ -22,7 +22,7 @@ const COMMODITIES_QUERY = `
 // Function to fetch commodities from The Graph API
 async function fetchCommodities() {
   try {
-    const response = await fetch('https://api.studio.thegraph.com/query/59606/cmt2/v0.0.1', {
+    const response = await fetch('https://api.studio.thegraph.com/query/33148/commodity-market-ticker/v0.0.3', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -43,14 +43,17 @@ async function fetchCommodities() {
   }
 }
 
-export default function  CommodityItems(){
+export default function  CommodityItems({ onCommoditiesFetched }){
   const [commodities, setCommodities] = useState<Commodity[]>([]);
 
   useEffect(() => {
     fetchCommodities().then(fetchedCommodities => {
       setCommodities(fetchedCommodities);
+      if (onCommoditiesFetched) {
+        onCommoditiesFetched(fetchedCommodities);
+      }
     });
-  }, []);
+  }, [onCommoditiesFetched]);
 
   return (
     <section >
@@ -73,7 +76,7 @@ export default function  CommodityItems(){
              <th>{index}</th>
           <th>{commodity.name}</th>
           <td>{commodity.symbol}</td>
-          <td>{commodity.token}</td>
+          <td>{commodity.comId}</td>
         </tr>
         ))}
     
