@@ -22,6 +22,6 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src_", "src/components/Root.tsx", "src/components/Hero.tsx", "src/components/Footer.tsx", "src/components/Navbar.tsx", "src/hooks", "src/config", "src/context"],
+  "include": ["src"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
