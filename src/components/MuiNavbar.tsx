@@ -21,9 +21,10 @@ import {
   Menu as MenuIcon,
   TrendingUp,
   Home,
-  List,
   Info,
   AccountBalanceWallet,
+  Inventory,
+  ShoppingCart,
 } from '@mui/icons-material';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useWalletContext } from '../context/wallet';
@@ -90,7 +91,8 @@ const MuiNavbar: React.FC = () => {
 
   const navigationItems = [
     { label: 'Home', path: '/', icon: <Home /> },
-    { label: 'Tickers', path: '/tickers', icon: <List /> },
+    { label: 'Commodities', path: '/commodities', icon: <Inventory /> },
+    { label: 'Orders', path: '/orders', icon: <ShoppingCart /> },
     { label: 'About', path: '/about', icon: <Info /> },
   ];
 
