@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   AppBar,
   Toolbar,
@@ -16,6 +16,7 @@ import {
   DialogActions,
   TextField,
   alpha,
+  Divider,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -28,6 +29,52 @@ import {
 } from '@mui/icons-material';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useWalletContext } from '../context/wallet';
+import CreateCommodityMaterialUI from './CreateCommodityMaterialUI';
+import PlaceOrderMaterialUI from './PlaceOrderMaterialUI';
+
+interface Commodity {
+  id: string;
+  name: string;
+  symbol: string;
+  comId: string;
+}
+
+// GraphQL query to fetch commodities for the order form
+const COMMODITIES_QUERY = `
+  query {
+        commodityCreateds {
+          id
+          comId
+          name
+          symbol
+      }
+  }
+`;
+
+// Function to fetch commodities from The Graph API
+async function fetchCommodities(): Promise<Commodity[]> {
+  try {
+    const response = await fetch('https://api.studio.thegraph.com/query/33148/commodity-market-ticker/v0.0.3', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({ query: COMMODITIES_QUERY }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Network response was not ok: ${response.statusText}`);
+    }
+
+    const jsonResponse = await response.json();
+    const data = jsonResponse.data.commodityCreateds as Commodity[];
+    return data;
+  } catch (error) {
+    console.error('Error fetching commodities:', error);
+    return [];
+  }
+}
 
 const MuiNavbar: React.FC = () => {
   const theme = useTheme();
@@ -44,8 +91,36 @@ const MuiNavbar: React.FC = () => {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
+  // Commodities state for PlaceOrder form
+  const [commodities, setCommodities] = useState<Commodity[]>([]);
+  const [refreshKey, setRefreshKey] = useState(0);
+
   // Wallet context
   const { isLoggedIn, login, logout, username, scaAddress } = useWalletContext();
+
+  // Load commodities for PlaceOrder form
+  useEffect(() => {
+    const loadCommodities = async () => {
+      try {
+        const fetchedCommodities = await fetchCommodities();
+        setCommodities(fetchedCommodities);
+      } catch (err) {
+        console.error('Error loading commodities:', err);
+      }
+    };
+
+    loadCommodities();
+  }, [refreshKey]);
+
+  // Refresh callbacks for forms
+  const refreshCommodities = () => {
+    setRefreshKey(prev => prev + 1);
+  };
+
+  const refreshOrders = () => {
+    // This could be expanded if needed to refresh orders in other parts of the app
+    console.log('Order placed successfully');
+  };
 
   const handleMobileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setMobileMenuAnchor(event.currentTarget);
@@ -161,6 +236,14 @@ const MuiNavbar: React.FC = () => {
           {/* Spacer for mobile */}
           {isMobile && <Box sx={{ flexGrow: 1 }} />}
 
+          {/* Action Buttons */}
+          {!isMobile && (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mr: 2 }}>
+              <CreateCommodityMaterialUI onCreationComplete={refreshCommodities} />
+              <PlaceOrderMaterialUI onOrderPlaced={refreshOrders} commodities={commodities} />
+            </Box>
+          )}
+
           {/* Wallet Section */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             {isLoggedIn ? (
@@ -250,6 +333,19 @@ const MuiNavbar: React.FC = () => {
             </Box>
           </MenuItem>
         ))}
+        <Divider />
+        <MenuItem>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, width: '100%' }}>
+            <CreateCommodityMaterialUI onCreationComplete={() => {
+              refreshCommodities();
+              handleMobileMenuClose();
+            }} />
+            <PlaceOrderMaterialUI onOrderPlaced={() => {
+              refreshOrders();
+              handleMobileMenuClose();
+            }} commodities={commodities} />
+          </Box>
+        </MenuItem>
       </Menu>
 
       {/* Wallet Connection Modal */}

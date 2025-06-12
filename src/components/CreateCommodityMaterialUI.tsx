@@ -28,6 +28,12 @@ const CreateCommodityMaterialUI: React.FC<CreateCommodityMaterialUIProps> = ({ o
   const [success, setSuccess] = useState(false);
 
   const handleOpen = () => {
+    if (!isLoggedIn) {
+      setError('Please connect your wallet to create a commodity.');
+      // Clear error after 5 seconds
+      setTimeout(() => setError(null), 5000);
+      return;
+    }
     setOpen(true);
     setError(null);
     setSuccess(false);
@@ -88,11 +94,15 @@ const CreateCommodityMaterialUI: React.FC<CreateCommodityMaterialUIProps> = ({ o
 
   return (
     <>
+      {error && !open && (
+        <Alert severity="warning" sx={{ mb: 2, maxWidth: 400 }} onClose={() => setError(null)}>
+          {error}
+        </Alert>
+      )}
       <Button
         variant="contained"
         startIcon={<Add />}
         onClick={handleOpen}
-        disabled={!isLoggedIn}
         sx={{ mb: 3 }}
       >
         Create New Commodity
