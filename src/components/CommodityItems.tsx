@@ -85,5 +85,4 @@ export default function  CommodityItems({ onCommoditiesFetched }){
 </div>
     </section>
   );
-};
-
+}

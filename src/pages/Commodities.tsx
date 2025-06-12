@@ -17,7 +17,7 @@ import {
   Alert,
 } from '@mui/material';
 import { Inventory } from '@mui/icons-material';
-import { mockCommodities } from '../data/mockCommoditiesOrders';
+import CreateCommodityMaterialUI from '../components/CreateCommodityMaterialUI';
 
 interface Commodity {
   id: string;
@@ -56,10 +56,10 @@ async function fetchCommodities(): Promise<Commodity[]> {
 
     const jsonResponse = await response.json();
     const data = jsonResponse.data.commodityCreateds as Commodity[];
-    return data.length > 0 ? data : mockCommodities;
+    return data;
   } catch (error) {
     console.error('Error fetching commodities:', error);
-    return mockCommodities;
+    throw error;
   }
 }
 
@@ -67,6 +67,11 @@ const Commodities: React.FC = () => {
   const [commodities, setCommodities] = useState<Commodity[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const refreshCommodities = () => {
+    setRefreshKey(prev => prev + 1);
+  };
 
   useEffect(() => {
     const loadCommodities = async () => {
@@ -84,7 +89,7 @@ const Commodities: React.FC = () => {
     };
 
     loadCommodities();
-  }, []);
+  }, [refreshKey]);
 
   return (
     <Box sx={{ bgcolor: 'background.default', minHeight: '100vh', py: 6 }}>
@@ -110,6 +115,11 @@ const Commodities: React.FC = () => {
           <Typography variant="h6" color="text.secondary" sx={{ maxWidth: 600, mx: 'auto' }}>
             Explore all available commodities in our marketplace. Track prices, monitor trends, and discover trading opportunities.
           </Typography>
+        </Box>
+
+        {/* Create Commodity Button */}
+        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 4 }}>
+          <CreateCommodityMaterialUI onCreationComplete={refreshCommodities} />
         </Box>
 
         {/* Content */}
