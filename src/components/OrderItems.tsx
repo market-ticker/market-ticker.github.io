@@ -106,4 +106,4 @@ export default function OrderItems(){
       </div>
     </section>
   );
-};
+}

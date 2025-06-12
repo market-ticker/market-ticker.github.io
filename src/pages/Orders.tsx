@@ -19,7 +19,7 @@ import {
   useTheme,
 } from '@mui/material';
 import { ShoppingCart, TrendingUp, TrendingDown } from '@mui/icons-material';
-import { mockOrders } from '../data/mockCommoditiesOrders';
+import PlaceOrderMaterialUI from '../components/PlaceOrderMaterialUI';
 
 interface Order {
   orderId: string;
@@ -33,6 +33,50 @@ interface Order {
   harvestDate: string;
   validityPeriod: string;
   isBuyOrder: boolean;
+}
+
+interface Commodity {
+  id: string;
+  name: string;
+  symbol: string;
+  comId: string;
+}
+
+// GraphQL query to fetch commodities for the order form
+const COMMODITIES_QUERY = `
+  query {
+        commodityCreateds {
+          id
+          comId
+          name
+          symbol
+      }
+  }
+`;
+
+// Function to fetch commodities from The Graph API
+async function fetchCommodities(): Promise<Commodity[]> {
+  try {
+    const response = await fetch('https://api.studio.thegraph.com/query/33148/commodity-market-ticker/v0.0.3', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({ query: COMMODITIES_QUERY }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Network response was not ok: ${response.statusText}`);
+    }
+
+    const jsonResponse = await response.json();
+    const data = jsonResponse.data.commodityCreateds as Commodity[];
+    return data;
+  } catch (error) {
+    console.error('Error fetching commodities:', error);
+    return [];
+  }
 }
 
 // GraphQL query to fetch orders
@@ -71,37 +115,47 @@ async function fetchOrders(): Promise<Order[]> {
 
     const jsonResponse = await response.json();
     const data = jsonResponse.data.orderPlaceds as Order[];
-    return data.length > 0 ? data : mockOrders;
+    return data;
   } catch (error) {
     console.error('Error fetching orders:', error);
-    return mockOrders;
+    throw error;
   }
 }
 
 const Orders: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
+  const [commodities, setCommodities] = useState<Commodity[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
+  const refreshOrders = () => {
+    setRefreshKey(prev => prev + 1);
+  };
+
   useEffect(() => {
-    const loadOrders = async () => {
+    const loadData = async () => {
       try {
         setLoading(true);
-        const fetchedOrders = await fetchOrders();
+        const [fetchedOrders, fetchedCommodities] = await Promise.all([
+          fetchOrders(),
+          fetchCommodities()
+        ]);
         setOrders(fetchedOrders);
+        setCommodities(fetchedCommodities);
         setError(null);
       } catch (err) {
-        setError('Failed to load orders');
-        console.error('Error loading orders:', err);
+        setError('Failed to load data');
+        console.error('Error loading data:', err);
       } finally {
         setLoading(false);
       }
     };
 
-    loadOrders();
-  }, []);
+    loadData();
+  }, [refreshKey]);
 
   const formatDate = (timestamp: string) => {
     try {
@@ -140,6 +194,11 @@ const Orders: React.FC = () => {
           <Typography variant="h6" color="text.secondary" sx={{ maxWidth: 600, mx: 'auto' }}>
             Track all trading orders in the marketplace. Monitor buy and sell orders, prices, and trading activity.
           </Typography>
+        </Box>
+
+        {/* Place Order Button */}
+        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 4 }}>
+          <PlaceOrderMaterialUI onOrderPlaced={refreshOrders} commodities={commodities} />
         </Box>
 
         {/* Content */}

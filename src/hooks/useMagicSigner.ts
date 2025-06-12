@@ -11,7 +11,7 @@ export const useMagicSigner = () => {
   });
 
   const magicSigner: SmartAccountSigner = new WalletClientSigner(
-    magicClient as any,
+    magicClient,
     "magic"
   );
 
