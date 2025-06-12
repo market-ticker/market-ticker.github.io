@@ -14,12 +14,15 @@ import {
   Assessment,
   Speed,
   Security,
+  AccountBalanceWallet,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import { useWalletContext } from '../context/wallet';
 import { mockTickers } from '../data/mockTickers';
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
+  const { isLoggedIn } = useWalletContext();
   
   // Get top performing tickers for showcase
   const topPerformers = mockTickers
@@ -101,19 +104,42 @@ const Home: React.FC = () => {
                 <Button
                   variant="contained"
                   size="large"
-                  onClick={() => navigate('/tickers')}
+                  onClick={() => navigate('/commodities')}
                   sx={{ px: 4, py: 1.5 }}
                 >
-                  View All Tickers
+                  View Commodities
                 </Button>
                 <Button
                   variant="outlined"
                   size="large"
-                  onClick={() => navigate('/about')}
+                  onClick={() => navigate('/orders')}
                   sx={{ px: 4, py: 1.5 }}
                 >
-                  Learn More
+                  Browse Orders
                 </Button>
+                {!isLoggedIn && (
+                  <Button
+                    variant="contained"
+                    size="large"
+                    color="secondary"
+                    startIcon={<AccountBalanceWallet />}
+                    onClick={() => {
+                      // This will trigger the login modal in the navbar
+                      // We could also create a direct login function here
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    sx={{ 
+                      px: 4, 
+                      py: 1.5,
+                      background: 'linear-gradient(125deg, #ff9c27 0%, #fd48ce 51.7%)',
+                      '&:hover': {
+                        background: 'linear-gradient(125deg, #e8890f 0%, #e634b7 51.7%)',
+                      }
+                    }}
+                  >
+                    Connect Wallet
+                  </Button>
+                )}
               </Box>
             </Box>
             <Box>
@@ -231,7 +257,7 @@ const Home: React.FC = () => {
           <Button
             variant="contained"
             size="large"
-            onClick={() => navigate('/tickers')}
+            onClick={() => navigate('/commodities')}
             sx={{ px: 6, py: 1.5 }}
           >
             Get Started Now

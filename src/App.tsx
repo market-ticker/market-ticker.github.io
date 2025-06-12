@@ -7,6 +7,8 @@ import Footer from './components/Footer';
 import Home from './pages/Home';
 import TickerList from './pages/TickerList';
 import About from './pages/About';
+import Commodities from './pages/Commodities';
+import Orders from './pages/Orders';
 import Root from './components/Root'; // Legacy root component for /legacy route
 import './App.css';
 
@@ -27,6 +29,8 @@ function App() {
             <Box component="main" sx={{ flexGrow: 1 }}>
               <Routes>
                 <Route path="/" element={<Home />} />
+                <Route path="/commodities" element={<Commodities />} />
+                <Route path="/orders" element={<Orders />} />
                 <Route path="/tickers" element={<TickerList />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/legacy" element={<Root />} />
