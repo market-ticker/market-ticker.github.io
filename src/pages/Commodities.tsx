@@ -17,6 +17,7 @@ import {
   Alert,
 } from '@mui/material';
 import { Inventory } from '@mui/icons-material';
+import { mockCommodities } from '../data/mockCommoditiesOrders';
 
 interface Commodity {
   id: string;
@@ -54,10 +55,11 @@ async function fetchCommodities(): Promise<Commodity[]> {
     }
 
     const jsonResponse = await response.json();
-    return jsonResponse.data.commodityCreateds as Commodity[];
+    const data = jsonResponse.data.commodityCreateds as Commodity[];
+    return data.length > 0 ? data : mockCommodities;
   } catch (error) {
     console.error('Error fetching commodities:', error);
-    return [];
+    return mockCommodities;
   }
 }
 
@@ -137,15 +139,15 @@ const Commodities: React.FC = () => {
                 </Typography>
               </Box>
             ) : (
-              <TableContainer component={Paper} elevation={0}>
-                <Table>
+              <TableContainer component={Paper} elevation={0} sx={{ overflowX: 'auto' }}>
+                <Table stickyHeader>
                   <TableHead>
                     <TableRow sx={{ bgcolor: 'grey.50' }}>
-                      <TableCell sx={{ fontWeight: 600 }}>#</TableCell>
-                      <TableCell sx={{ fontWeight: 600 }}>Name</TableCell>
-                      <TableCell sx={{ fontWeight: 600 }}>Symbol</TableCell>
-                      <TableCell sx={{ fontWeight: 600 }}>Commodity ID</TableCell>
-                      <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
+                      <TableCell sx={{ fontWeight: 600, minWidth: '60px' }}>#</TableCell>
+                      <TableCell sx={{ fontWeight: 600, minWidth: '150px' }}>Name</TableCell>
+                      <TableCell sx={{ fontWeight: 600, minWidth: '100px' }}>Symbol</TableCell>
+                      <TableCell sx={{ fontWeight: 600, minWidth: '200px' }}>Commodity ID</TableCell>
+                      <TableCell sx={{ fontWeight: 600, minWidth: '100px' }}>Status</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>

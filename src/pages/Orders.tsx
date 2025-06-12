@@ -19,6 +19,7 @@ import {
   useTheme,
 } from '@mui/material';
 import { ShoppingCart, TrendingUp, TrendingDown } from '@mui/icons-material';
+import { mockOrders } from '../data/mockCommoditiesOrders';
 
 interface Order {
   orderId: string;
@@ -69,10 +70,11 @@ async function fetchOrders(): Promise<Order[]> {
     }
 
     const jsonResponse = await response.json();
-    return jsonResponse.data.orderPlaceds as Order[];
+    const data = jsonResponse.data.orderPlaceds as Order[];
+    return data.length > 0 ? data : mockOrders;
   } catch (error) {
     console.error('Error fetching orders:', error);
-    return [];
+    return mockOrders;
   }
 }
 
@@ -167,21 +169,21 @@ const Orders: React.FC = () => {
                 </Typography>
               </Box>
             ) : (
-              <TableContainer component={Paper} elevation={0}>
-                <Table size={isMobile ? 'small' : 'medium'}>
+              <TableContainer component={Paper} elevation={0} sx={{ overflowX: 'auto' }}>
+                <Table size={isMobile ? 'small' : 'medium'} stickyHeader={!isMobile}>
                   <TableHead>
                     <TableRow sx={{ bgcolor: 'grey.50' }}>
-                      <TableCell sx={{ fontWeight: 600 }}>Order ID</TableCell>
-                      <TableCell sx={{ fontWeight: 600 }}>Owner</TableCell>
-                      <TableCell sx={{ fontWeight: 600 }}>Commodity ID</TableCell>
-                      <TableCell sx={{ fontWeight: 600 }}>Region</TableCell>
-                      <TableCell sx={{ fontWeight: 600 }}>Country</TableCell>
-                      <TableCell sx={{ fontWeight: 600, textAlign: 'right' }}>Amount</TableCell>
-                      <TableCell sx={{ fontWeight: 600, textAlign: 'right' }}>Price</TableCell>
-                      <TableCell sx={{ fontWeight: 600 }}>Currency</TableCell>
-                      <TableCell sx={{ fontWeight: 600 }}>Harvest Date</TableCell>
-                      <TableCell sx={{ fontWeight: 600 }}>Validity</TableCell>
-                      <TableCell sx={{ fontWeight: 600, textAlign: 'center' }}>Type</TableCell>
+                      <TableCell sx={{ fontWeight: 600, minWidth: '100px' }}>Order ID</TableCell>
+                      <TableCell sx={{ fontWeight: 600, minWidth: '120px' }}>Owner</TableCell>
+                      <TableCell sx={{ fontWeight: 600, minWidth: '100px' }}>Commodity ID</TableCell>
+                      <TableCell sx={{ fontWeight: 600, minWidth: '100px' }}>Region</TableCell>
+                      <TableCell sx={{ fontWeight: 600, minWidth: '100px' }}>Country</TableCell>
+                      <TableCell sx={{ fontWeight: 600, textAlign: 'right', minWidth: '80px' }}>Amount</TableCell>
+                      <TableCell sx={{ fontWeight: 600, textAlign: 'right', minWidth: '80px' }}>Price</TableCell>
+                      <TableCell sx={{ fontWeight: 600, minWidth: '80px' }}>Currency</TableCell>
+                      <TableCell sx={{ fontWeight: 600, minWidth: '120px' }}>Harvest Date</TableCell>
+                      <TableCell sx={{ fontWeight: 600, minWidth: '80px' }}>Validity</TableCell>
+                      <TableCell sx={{ fontWeight: 600, textAlign: 'center', minWidth: '80px' }}>Type</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
