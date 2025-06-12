@@ -49,6 +49,12 @@ const PlaceOrderMaterialUI: React.FC<PlaceOrderMaterialUIProps> = ({ onOrderPlac
   const [success, setSuccess] = useState(false);
 
   const handleOpen = () => {
+    if (!isLoggedIn) {
+      setError('Please connect your wallet to place an order.');
+      // Clear error after 5 seconds
+      setTimeout(() => setError(null), 5000);
+      return;
+    }
     setOpen(true);
     setError(null);
     setSuccess(false);
@@ -147,11 +153,16 @@ const PlaceOrderMaterialUI: React.FC<PlaceOrderMaterialUIProps> = ({ onOrderPlac
 
   return (
     <>
+      {error && !open && (
+        <Alert severity="warning" sx={{ mb: 2, maxWidth: 400 }} onClose={() => setError(null)}>
+          {error}
+        </Alert>
+      )}
       <Button
         variant="contained"
         startIcon={<ShoppingCart />}
         onClick={handleOpen}
-        disabled={!isLoggedIn || commodities.length === 0}
+        disabled={commodities.length === 0}
         sx={{ mb: 3 }}
       >
         Place New Order
